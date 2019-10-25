@@ -17,5 +17,7 @@ jq \
 # Init the database.
 node models/yugabyte/db_init.js
 
+touch healthy
+
 # Start the rest service
 npm start

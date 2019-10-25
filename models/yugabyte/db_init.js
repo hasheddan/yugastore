@@ -15,7 +15,18 @@ console.log("DB host: " + options.DB_HOST);
 //
 // Create a YugaByte client for Cassandra and Redis APIs.
 //
-const ybRedisClient = redis.createClient({host: DB_HOST});
+const ybRedisClient = redis.createClient({host: DB_HOST, retry_strategy: function retry(options) {
+  console.log(options);
+  if (options.error.code === 'ECONNREFUSED') {
+    console.log('connection refused');
+  }
+  if (options.total_retry_time > 1000 * 60 * 60) {
+    return new Error('Retry time exhausted');
+  }
+
+  return Math.max(5000);
+}});
+
 const ybCassandraClient = new cassandra.Client({ contactPoints: [DB_HOST] });
 
 ybCassandraClient.connect().then(function(){
